@@ -1,0 +1,17 @@
+.header_container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
+.body_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.head_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
