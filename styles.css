@@ -1,16 +1,16 @@
-.header_container {
-    display: flex;
-    justify-content: center;
-    align-items: center; 
-}
-
-.body_container{
+.header-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.head_container{
+.body-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container {
     display: flex;
     justify-content: center;
     align-items: center;
