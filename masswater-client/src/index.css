@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,18 +7,8 @@
 }
 
 body {
-  font-family: sans-serif;
-  background-color: #f0f4f8;
-}
-
-display: inline-flex;
-border-radius: 4px;
-color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  min-height: 100vh;
+  background: linear-gradient(170deg, #0a1628 0%, #0d2144 40%, #112b55 70%, #0e1f3d 100%);
+  font-family: 'DM Sans', sans-serif;
+  color: #d0e8ff;
 }
