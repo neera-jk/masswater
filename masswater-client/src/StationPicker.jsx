@@ -44,6 +44,7 @@ function StationPicker() {
         setLoading(true)
         setMessage("Fetching data from NOAA...")
         setData(null)
+        setLastUpdated(null)
 
         fetch(`https://api.weather.gov/stations/${stationId}/observations/latest`)
             .then(r => r.json())
@@ -73,132 +74,203 @@ function StationPicker() {
                 setLastUpdated(new Date())
             })
             .catch(() => {
-                setMessage("Could not fetch data. Try again.")
+                setMessage("Could not reach this station. Try another.")
+                setLastUpdated(null)
+                setData(null)
                 setLoading(false)
             })
     }
 
     return (
-        <div className="station-picker" style={{
-            border: "1px solid rgba(140,200,255,0.15)",
-            borderRadius: "16px",
-            padding: "1.5rem",
-            width: "100%",
-            maxWidth: "820px",
-        }}>
-            <select
-                className="station-select"
-                onChange={handleStationChange}
-                defaultValue=""
-                style={{
-                    width: "100%",
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(140,200,255,0.2)",
-                    borderRadius: "10px",
-                    color: "#d0e8ff",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "14px",
-                    padding: "12px 16px",
-                    cursor: "pointer",
-                    outline: "none",
-                    marginBottom: "1.2rem",
-                }}
-            >
-                <option value="" disabled>— Select a station —</option>
-                {stations.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-            </select>
-
-            <div className="content-columns" style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
-                {/* Left column: ScoreCard */}
-                <div className="column-left" style={{ flex: 1, minWidth: 0 }}>
-                    {data && (
-                        <ScoreCard
-                            depthInches={data.depthInches}
-                            tempF={data.tempF}
-                            windMph={data.windMph}
-                        />
-                    )}
-
-                    {lastUpdated && (
-                        <p className="last-updated" style={{
-                            textAlign: "center",
-                            fontSize: "11px",
-                            color: "rgba(180,210,255,0.3)",
-                            marginTop: "0.8rem",
-                            letterSpacing: "1px"
-                        }}>
-                            Last updated: {getTimeAgo(lastUpdated)}
-                        </p>
-                    )}
-                </div>
-
-                {/* Right column: Gauge + Stats */}
-                <div className="column-right" style={{ flex: 1, minWidth: 0 }}>
-                    {(data || loading) && (
-                        <div className="gauge-section" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.2rem", marginBottom: "1.5rem" }}>
-                            <div className="gauge-wrapper" style={{ position: "relative" }}>
-                                {data ? (
-                                    <SnowGauge depthInches={data.depthInches} isSnowing={data.isSnowing} />
-                                ) : (
-                                    <div className="gauge-placeholder" style={{
-                                        border: "2px solid rgba(140,200,255,0.15)",
-                                        background: "rgba(0,0,0,0.3)"
-                                    }} />
-                                )}
-                                <div className="gauge-ticks" style={{ position: "absolute", right: "-30px", top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "10px 0" }}>
-                                    {["30\"", "20\"", "10\"", "0\""].map(t => (
-                                        <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                            <div style={{ width: "8px", height: "1px", background: "rgba(140,200,255,0.2)" }} />
-                                            <span style={{ fontSize: "10px", color: "rgba(180,210,255,0.35)", whiteSpace: "nowrap" }}>{t}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="depth-info" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                <div className="depth-value" style={{ fontFamily: "'Playfair Display', serif", fontSize: "58px", fontWeight: 700, color: "#a8d8ff", lineHeight: 1 }}>
-                                    {loading ? "..." : data ? data.depthInches + '"' : "--"}
-                                </div>
-                                <div className="depth-label" style={{ fontSize: "11px", textTransform: "uppercase", color: "rgba(180,210,255,0.4)" }}>
-                                    Snow depth
-                                </div>
-                                <div className="status-message" style={{ fontSize: "12px", marginTop: "2px" }}>
-                                    {message}
-                                </div>
-                                {data && (
-                                    <div className="replay-hint" style={{ fontSize: "11px", fontStyle: "italic", marginTop: "4px" }}>
-                                        ← click to replay
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {data && (
-                <div className="weather-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginTop: "1.2rem" }}>
-                    {[
-                        { label: "Temp", value: data.tempF !== null ? data.tempF + "°F" : "N/A" },
-                        { label: "Wind", value: data.windMph !== null ? data.windMph + " mph" : "N/A" },
-                        { label: "Humidity", value: data.humidity !== null ? data.humidity + "%" : "N/A" },
-                    ].map(stat => (
-                        <div key={stat.label} className="stat-card" style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(140,200,255,0.1)",
-                            borderRadius: "10px",
-                            padding: "10px",
-                            textAlign: "center"
-                        }}>
-                            <div className="stat-value" style={{ fontSize: "18px", color: "#c8e8ff" }}>{stat.value}</div>
-                            <div className="stat-label" style={{ fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase", marginTop: "2px" }}>{stat.label}</div>
-                        </div>
+        <>
+            <style>{`
+          @keyframes shimmer {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+          }
+          .skeleton {
+            animation: shimmer 1.5s ease-in-out infinite;
+            background: rgba(255,255,255,0.07);
+            border-radius: 8px;
+          }
+          /* score card should never overflow */
+          .score-card-wrap {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+            max-width: 340px;
+          }
+          @media (max-width: 656px) {
+            .score-card-wrap {
+              max-width: 100%;
+            }
+          }
+          .gauge-layout {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+          }
+          /* large tablets and small laptops (656px and below) */
+          @media (max-width: 656px) {
+            .gauge-layout {
+              flex-direction: column;
+              align-items: center;
+              gap: 1.5rem;
+            }
+          }
+        `}</style>
+            <div className="station-picker" style={{
+                border: "1px solid rgba(140,200,255,0.15)",
+                borderRadius: "16px",
+                width: "100%",
+                maxWidth: "660px",
+                boxSizing: "border-box",
+                padding: "1.25rem",
+                margin: "0 auto",
+            }}>
+                <select
+                    className="station-select"
+                    onChange={handleStationChange}
+                    defaultValue=""
+                    style={{
+                        width: "100%",
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(140,200,255,0.2)",
+                        borderRadius: "10px",
+                        color: "#d0e8ff",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: "14px",
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        outline: "none",
+                        marginBottom: "1.2rem",
+                    }}
+                >
+                    <option value="" disabled>— Select a station —</option>
+                    {stations.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
+                </select>
+
+                <div className="gauge-layout">
+                    {/* Left column: ScoreCard */}
+                    <div className="column-left" style={{ flex: 1, minWidth: 0 }}>
+                        {loading && (
+                            <div style={{ width: "100%" }}>
+                                <div className="skeleton" style={{ height: "120px", borderRadius: "14px", marginBottom: "12px" }} />
+                                <div className="skeleton" style={{ height: "20px", width: "60%", margin: "0 auto 8px" }} />
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px" }}>
+                                    <div className="skeleton" style={{ height: "60px" }} />
+                                    <div className="skeleton" style={{ height: "60px" }} />
+                                    <div className="skeleton" style={{ height: "60px" }} />
+                                </div>
+                            </div>
+                        )}
+
+                        {data && data.tempF === null && data.windMph === null && (
+                            <p style={{
+                                textAlign: "center",
+                                fontSize: "13px",
+                                color: "rgba(230,150,150,0.7)",
+                                marginBottom: "1rem"
+                            }}>
+                                This station isn't reporting full data right now.
+                            </p>
+                        )}
+
+                        <div className="score-card-wrap">
+                            {data && (
+                                <ScoreCard
+                                    depthInches={data.depthInches}
+                                    tempF={data.tempF}
+                                    windMph={data.windMph}
+                                />
+                            )}
+
+                            {lastUpdated && (
+                                <p className="last-updated" style={{
+                                    textAlign: "center",
+                                    fontSize: "11px",
+                                    color: "rgba(180,210,255,0.3)",
+                                    marginTop: "0.8rem",
+                                    letterSpacing: "1px"
+                                }}>
+                                    Last updated: {getTimeAgo(lastUpdated)}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right column: Gauge + Stats */}
+                    <div className="column-right" style={{ flex: 1, minWidth: 0 }}>
+                        {(data || loading) && (
+                            <div className="gauge-section" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.2rem", marginBottom: "1.5rem" }}>
+                                <div className="gauge-wrapper" style={{ position: "relative" }}>
+                                    {data ? (
+                                        <SnowGauge depthInches={data.depthInches} isSnowing={data.isSnowing} />
+                                    ) : (
+                                        <div className="gauge-placeholder" style={{
+                                            border: "2px solid rgba(140,200,255,0.15)",
+                                            background: "rgba(0,0,0,0.3)"
+                                        }} />
+                                    )}
+                                    <div className="gauge-ticks" style={{ position: "absolute", right: "-30px", top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "10px 0" }}>
+                                        {["30\"", "20\"", "10\"", "0\""].map(t => (
+                                            <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                                <div style={{ width: "8px", height: "1px", background: "rgba(140,200,255,0.2)" }} />
+                                                <span style={{ fontSize: "10px", color: "rgba(180,210,255,0.35)", whiteSpace: "nowrap" }}>{t}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="depth-info" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <div className="depth-value" style={{ fontFamily: "'Playfair Display', serif", fontSize: "58px", fontWeight: 700, color: "#a8d8ff", lineHeight: 1 }}>
+                                        {loading ? "..." : data ? data.depthInches + '"' : "--"}
+                                    </div>
+                                    <div className="depth-label" style={{ fontSize: "11px", textTransform: "uppercase", color: "rgba(180,210,255,0.4)" }}>
+                                        Snow depth
+                                    </div>
+                                    <div className="status-message" style={{ fontSize: "12px", marginTop: "2px" }}>
+                                        {message}
+                                    </div>
+                                    {data && (
+                                        <div className="replay-hint" style={{ fontSize: "11px", fontStyle: "italic", marginTop: "4px" }}>
+                                            ← click to replay
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
-        </div >
+
+                {data && (
+                    <div className="weather-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginTop: "1.2rem" }}>
+                        {[
+                            { label: "Temp", value: data.tempF !== null ? data.tempF + "°F" : "N/A" },
+                            { label: "Wind", value: data.windMph !== null ? data.windMph + " mph" : "N/A" },
+                            { label: "Humidity", value: data.humidity !== null ? data.humidity + "%" : "N/A" },
+                        ].map(stat => (
+                            <div key={stat.label} className="stat-card" style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1px solid rgba(140,200,255,0.1)",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                textAlign: "center"
+                            }}>
+                                <div className="stat-value" style={{ fontSize: "18px", color: "#c8e8ff" }}>{stat.value}</div>
+                                <div className="stat-label" style={{ fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase", marginTop: "2px" }}>{stat.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div >
+        </>
     )
 }
 

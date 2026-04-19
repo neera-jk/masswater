@@ -13,7 +13,9 @@ function App() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "3rem 1rem",
+        padding: "1rem",
+        boxSizing: "border-box",
+        width: "100%",
         gap: "1rem"
       }}>
         <p style={{
