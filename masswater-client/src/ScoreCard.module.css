@@ -1,0 +1,87 @@
+.breakdownTitle {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+
+.breakdownPoints {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.breakdownMax {
+    font-size: 11px;
+    opacity: 0.4;
+}
+
+.scoreCard {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(140, 200, 255, 0.15);
+    border-radius: 12px;
+    padding: 24px;
+    color: #d0e8ff;
+    font-family: inherit;
+}
+
+.scoreDisplay {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.scoreNumber {
+    font-size: 56px;
+    font-weight: 800;
+}
+
+.scoreMax {
+    font-size: 20px;
+    opacity: 0.5;
+    margin-left: 4px;
+}
+
+.scoreBadge {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.scoreLabel {
+    color: #0a1929;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    /* background is dynamic */
+}
+
+.scoreProgressTrack {
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.scoreProgressFill {
+    height: 100%;
+    border-radius: 5px;
+    /* background is dynamic */
+    transition: width 0.4s ease;
+}
+
+.scoreReason {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.75;
+    margin: 0 0 20px;
+}
+
+.scoreBreakdown {
+    display: flex;
+    gap: 12px;
+}
+
+.breakdownCard {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(140, 200, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+}

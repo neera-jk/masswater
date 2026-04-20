@@ -1,6 +1,7 @@
 import StationPicker from "./StationPicker"
 import Snowfall from "./Snowfall"
 import "./index.css"
+import styles from "./App.module.css"
 
 function App() {
   return (
@@ -18,25 +19,14 @@ function App() {
         width: "100%",
         gap: "1rem"
       }}>
-        <p style={{
-          fontSize: "11px",
-          letterSpacing: "3px",
-          textTransform: "uppercase",
-          color: "rgba(180,210,255,0.5)",
-          fontWeight: 300
-        }}>
-          Massachusetts Snow Tracker
-        </p>
-        <h1 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "clamp(36px, 8vw, 64px)",
-          fontWeight: 700,
-          color: "#e8f4ff",
-          letterSpacing: "-1px",
-          textShadow: "0 0 40px rgba(140,200,255,0.3)"
-        }}>
-          MassWater
-        </h1>
+        <div className={styles.header}>
+          <h1 className={styles.headerTitle}>
+            MASSACHUSETTS SNOW TRACKER
+          </h1>
+          <p className={styles.headerSubtitle}>
+            New England · Real-time conditions
+          </p>
+        </div>
         <StationPicker />
       </div>
     </div>
