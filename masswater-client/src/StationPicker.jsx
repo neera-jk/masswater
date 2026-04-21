@@ -1,43 +1,17 @@
 import { useState } from "react"
 import SnowGauge from "./SnowGauge"
 import ScoreCard from "./ScoreCard"
+import StationSelect from "./StationSelect"
+import StatCards from "./StatCards"
 import styles from "./StationPicker.module.css"
-
-const stations = [
-    { id: "KORH", name: "Wachusett Mountain (Worcester)" },
-    { id: "KCON", name: "Cannon Mountain (Concord NH)" },
-    { id: "KVSF", name: "Okemo / Killington area (Springfield VT)" },
-    { id: "KEEN", name: "Wildcat / Attitash area (Keene NH)" },
-    { id: "KLEB", name: "Sunapee / Dartmouth area (Lebanon NH)" },
-    { id: "KBTV", name: "Stowe / Sugarbush area (Burlington VT)" },
-    { id: "KBML", name: "Bretton Woods area (Berlin NH)" },
-    { id: "KACK", name: "Nantucket (coastal reference)" },
-]
-
-function checkIsSnowing(presentWeather) {
-    if (!presentWeather || presentWeather.length === 0) return false
-    return presentWeather.some(w => {
-        const desc = (w.weather || "").toLowerCase()
-        return desc.includes("snow") || desc.includes("flurr")
-    })
-}
-
-function getTimeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000)
-    if (seconds < 10) return "just now"
-    if (seconds < 60) return `${seconds} seconds ago`
-    const minutes = Math.floor(seconds / 60)
-    if (minutes === 1) return "1 minute ago"
-    return `${minutes} minutes ago`
-}
+import stations from "./stations"
+import { checkIsSnowing, getTimeAgo } from "./utils"
 
 function StationPicker() {
     const [data, setData] = useState(null)
     const [message, setMessage] = useState("Select a location above")
     const [loading, setLoading] = useState(false)
     const [lastUpdated, setLastUpdated] = useState(null)
-    const [tempUnit, setTempUnit] = useState('f')
-    const [windUnit, setWindUnit] = useState('mph')
 
     function handleStationChange(event) {
         const stationId = event.target.value
@@ -85,16 +59,7 @@ function StationPicker() {
 
     return (
         <div className={styles.stationPicker}>
-            <select
-                className={styles.stationSelect}
-                onChange={handleStationChange}
-                defaultValue=""
-            >
-                <option value="" disabled>Select a mountain range</option>
-                {stations.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-            </select>
+            <StationSelect onChange={handleStationChange} />
 
             {(data || loading) && (
                 <div className={styles.mainCard}>
@@ -176,49 +141,11 @@ function StationPicker() {
             )}
 
             {data && (
-                <div className={styles.weatherStats}>
-                    <div
-                        className={styles.statCardClickable}
-                        onClick={() => setTempUnit(u => u === 'f' ? 'c' : 'f')}
-                    >
-                        <div className={styles.statValue}>
-                            {data.tempF !== null
-                                ? tempUnit === 'f'
-                                    ? data.tempF + '°F'
-                                    : Math.round((data.tempF - 32) * 5 / 9) + '°C'
-                                : 'N/A'}
-                        </div>
-                        <div className={styles.statLabel}>Temp</div>
-                        <div className={styles.statUnitHint}>
-                            {tempUnit === 'f' ? 'tap for °C' : 'tap for °F'}
-                        </div>
-                    </div>
-
-                    <div
-                        className={styles.statCardClickable}
-                        onClick={() => setWindUnit(u => u === 'mph' ? 'kmh' : 'mph')}
-                    >
-                        <div className={styles.statValue}>
-                            {data.windMph !== null
-                                ? windUnit === 'mph'
-                                    ? data.windMph + ' mph'
-                                    : Math.round(data.windMph * 1.60934) + ' km/h'
-                                : 'N/A'}
-                        </div>
-                        <div className={styles.statLabel}>Wind</div>
-                        <div className={styles.statUnitHint}>
-                            {windUnit === 'mph' ? 'tap for km/h' : 'tap for mph'}
-                        </div>
-                    </div>
-
-                    <div className={styles.statCard}>
-                        <div className={styles.statValue}>
-                            {data.humidity !== null ? data.humidity + '%' : 'N/A'}
-                        </div>
-                        <div className={styles.statLabel}>Humidity</div>
-                        <div className={styles.statUnitHint}>&nbsp;</div>
-                    </div>
-                </div>
+                <StatCards
+                    tempF={data.tempF}
+                    windMph={data.windMph}
+                    humidity={data.humidity}
+                />
             )}
         </div>
     )
